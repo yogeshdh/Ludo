@@ -1,5 +1,5 @@
 import { Component } from "@angular/core";
-import { Board } from "./models/board";
+import { Board, Coin, Player } from "./models/board";
 import { PathData } from "./models/data";
 
 @Component({
@@ -10,8 +10,8 @@ import { PathData } from "./models/data";
 export class AppComponent {
   title = "Ludo App";
 
-  board = null;
-  coins = [];
+  board: Board;
+  coins: Coin[];
   activePlayer = null;
 
   player1;
@@ -59,15 +59,16 @@ export class AppComponent {
     this.board.dice = num;
 
     if (
-      this.activePlayer.activeCoin.currentPosition === -1 &&
-      this.board.dice === 6
+      this.activePlayer.activeCoin.currentPosition === -1
     ) {
       this.activePlayer.activeCoin.currentPosition = 0;
     }
 
     let theLoop: (i: number, delay?) => void = (i: number, delay = 100) => {
+      var parent = this;
       setTimeout(() => {
-        this.activePlayer.move();
+        parent.activePlayer.move();
+        this.killConflicts(parent.activePlayer);
         if (--i) {
           theLoop(i);
         }
@@ -80,6 +81,18 @@ export class AppComponent {
     this.getCoinPosition();
   }
 
+  private killConflicts(activePlayer) {
+    this.board.players.forEach((Player) => {
+      if (Player.id != this.activePlayer.id) {
+        let conflictCoins = Player.coins.filter((coin) => coin.getIsPositionEqual(activePlayer.activeCoin));
+        if (conflictCoins && conflictCoins.length > 0) {
+          Player.activeCoin = conflictCoins[0];
+          this.killAnimation(Player);
+        }
+      }
+    });
+  }
+
   changePlayer() {
     if (this.activePlayer.id === 4) {
       this.activePlayer = this.board.players[0];
@@ -88,11 +101,11 @@ export class AppComponent {
     }
   }
 
-  killAnimation() {
-    let currPos = this.activePlayer.activeCoin.currentPosition;
+  killAnimation(conflictingPlayer: Player) {
+    let currPos = conflictingPlayer.activeCoin.currentPosition;
     let theLoop: (i: number, delay?) => void = (i: number, delay = 25) => {
       setTimeout(() => {
-        this.activePlayer.moveReverse();
+        conflictingPlayer.moveReverse();
         i--;
         if (i > -1) {
           theLoop(i);
@@ -114,7 +127,7 @@ export class AppComponent {
       };
 
       return "translate(" + rect.left + "px," + rect.top + "px)";
-    } catch {}
+    } catch { }
 
     return this.activePlayer.activeCoin.x;
   }

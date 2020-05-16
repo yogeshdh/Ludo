@@ -19,7 +19,7 @@ export class Board {
   ];
 }
 
-class Player {
+export class Player {
   id: number;
   path: any[];
   coins: Coin[] = null;
@@ -115,7 +115,7 @@ class Player {
   }
 }
 
-class Coin {
+export class Coin {
   x = 0;
   y = 0;
   currentPosition: number = -1;
@@ -125,5 +125,9 @@ class Coin {
     this.x = _initalPos.x;
     this.y = _initalPos.y;
     this.color = _color;
+  }
+
+  getIsPositionEqual(coin: Coin){
+    return (this.x == coin.x && this.y == coin.y);
   }
 }
