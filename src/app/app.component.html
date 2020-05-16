@@ -105,7 +105,7 @@
   </h1>
 
   <div style="display: flex; align-items: center;">
-    <button (click)="killAnimation()">Kill</button>
+    <button (click)="killAnimation(this.activePlayer)">Kill</button>
     <button style="margin-left: 25px;" (click)="rollDice()">Roll Dice</button>
     <h3 style="margin-left: 25px;">{{ board.dice }}</h3>
   </div>
