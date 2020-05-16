@@ -50,7 +50,7 @@ export class Player {
     this.activeCoin.x = this.playerPath[currPos].x;
     this.activeCoin.y = this.playerPath[currPos].y;
 
-    this.visitedBoxs.push(this.playerPath[currPos]);
+    //this.visitedBoxs.push(this.playerPath[currPos]);
   }
 
   moveReverse() {
@@ -118,7 +118,7 @@ export class Player {
 export class Coin {
   x = 0;
   y = 0;
-  currentPosition: number = -1;
+  currentPosition: number = 0;
   color: string = "";
 
   constructor(_initalPos: any, _color) {
