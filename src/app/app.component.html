@@ -19,11 +19,15 @@
     background-color: red;
   }
   .coin {
-    color: black;
+    color: white;
     background-color: red;
     padding: 5px;
     position: absolute;
     transition-timing-function: linear;
+    z-index: 1;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
     /* transition-duration: 5s; */
   }
 
@@ -86,11 +90,18 @@
     transform: translate(336px, 336px);
     border-radius: 8px;
   }
+
+  .destination {
+    background-color: aqua;
+    width: 125px;
+    height: 125px;
+    transform: translate(210px, 210px);
+  }
 </style>
 
 <div>
-  <h1 class="label" [style.background-color]="player.color">
-    Player {{ player.id }}
+  <h1 class="label" [style.background-color]="activePlayer.color">
+    Player {{ activePlayer.id }}
   </h1>
 
   <div style="display: flex; align-items: center;">
@@ -101,9 +112,10 @@
 
   <div style="position: relative;">
     <div
+      *ngFor="let coin of coins; index as i"
       class="coin"
-      [style.background-color]="'white'"
-      [style.transform]="getCoinPosition()"
+      [style.background-color]="coin.color"
+      [style.transform]="getCoinXYPosition(coin)"
     >
       C
     </div>
@@ -120,6 +132,7 @@
     <div class="home4" style="position: absolute;">
       <div class="innerHome"></div>
     </div>
+    <div class="destination" style="position: absolute;"></div>
 
     <div *ngFor="let y of board.yplane; index as i">
       <div style="display: inline-flex;">

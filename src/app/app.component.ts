@@ -11,16 +11,41 @@ export class AppComponent {
   title = "Ludo App";
 
   board = null;
-  coins = ["1:1", "2:2"];
-  player = null;
+  coins = [];
+  activePlayer = null;
+
+  player1;
+  player2;
+  player3;
+  player4;
 
   ngOnInit() {
     this.board = new Board();
-    this.player = this.board.players[0];
+    this.player1 = this.board.players[0];
+    this.player2 = this.board.players[1];
+    this.player3 = this.board.players[2];
+    this.player4 = this.board.players[3];
+
+    this.activePlayer = this.player1;
+  }
+
+  ngAfterViewInit() {
+    var parent = this;
+
+    setTimeout(() => {
+      parent.coins = [
+        ...parent.player1.coins,
+        ...parent.player2.coins,
+        ...parent.player3.coins,
+        ...parent.player4.coins,
+      ];
+    });
+
+    console.log(JSON.stringify(this.coins));
   }
 
   drawPath(i, j) {
-    var data = this.player.playerPath.find(function (ele) {
+    var data = this.activePlayer.playerPath.find(function (ele) {
       return ele.x === i && ele.y === j;
     });
 
@@ -33,9 +58,16 @@ export class AppComponent {
     let num = this.randomNumberGenerator(1, 6);
     this.board.dice = num;
 
+    if (
+      this.activePlayer.activeCoin.currentPosition === -1 &&
+      this.board.dice === 6
+    ) {
+      this.activePlayer.activeCoin.currentPosition = 0;
+    }
+
     let theLoop: (i: number, delay?) => void = (i: number, delay = 100) => {
       setTimeout(() => {
-        this.player.move();
+        this.activePlayer.move();
         if (--i) {
           theLoop(i);
         }
@@ -49,18 +81,18 @@ export class AppComponent {
   }
 
   changePlayer() {
-    if (this.player.id === 4) {
-      this.player = this.board.players[0];
+    if (this.activePlayer.id === 4) {
+      this.activePlayer = this.board.players[0];
     } else {
-      this.player = this.board.players[this.player.id];
+      this.activePlayer = this.board.players[this.activePlayer.id];
     }
   }
 
   killAnimation() {
-    let currPos = this.player.activeCoin.currentPosition;
+    let currPos = this.activePlayer.activeCoin.currentPosition;
     let theLoop: (i: number, delay?) => void = (i: number, delay = 25) => {
       setTimeout(() => {
-        this.player.moveReverse();
+        this.activePlayer.moveReverse();
         i--;
         if (i > -1) {
           theLoop(i);
@@ -71,9 +103,10 @@ export class AppComponent {
   }
 
   getCoinPosition() {
-    // return "transform('translateX:" + this.player.activeCoin.x + "px')";
+    // return "transform('translateX:" + this.activePlayer.activeCoin.x + "px')";
     try {
-      var id = this.player.activeCoin.x + ":" + this.player.activeCoin.y;
+      var id =
+        this.activePlayer.activeCoin.x + ":" + this.activePlayer.activeCoin.y;
       var ele = document.getElementById(id);
       var rect = {
         left: ele.offsetLeft + 9,
@@ -83,7 +116,18 @@ export class AppComponent {
       return "translate(" + rect.left + "px," + rect.top + "px)";
     } catch {}
 
-    return this.player.activeCoin.x;
+    return this.activePlayer.activeCoin.x;
+  }
+
+  getCoinXYPosition(coin) {
+    var id = coin.x + ":" + coin.y;
+    var ele = document.getElementById(id);
+    if (ele != undefined) {
+      var rect = { left: ele.offsetLeft + 9, top: ele.offsetTop + 7 };
+      return "translate(" + rect.left + "px," + rect.top + "px)";
+    }
+
+    return "translate(" + 0 + "px," + 0 + "px)";
   }
 
   getOffset(el) {
@@ -95,30 +139,32 @@ export class AppComponent {
   }
 
   drawHomes(x, y) {
-    // var home1 = this.player.playerHome.find(function (ele) {
+    // var home1 = this.activePlayer.playerHome.find(function (ele) {
     //   return ele.x === x && ele.y === y;
     // });
 
-    var path = this.player.visitedBoxs.find(function (ele) {
+    var path = this.activePlayer.visitedBoxs.find(function (ele) {
       return ele.x === x && ele.y === y;
     });
 
-    // var coin = this.player.coins.find((ele) => {
+    // var coin = this.activePlayer.coins.find((ele) => {
     //   return ele.x === x && ele.y === y;
     // });
 
-    var coin = this.player.activeCoin.x === x && this.player.activeCoin.y === y;
+    var coin =
+      this.activePlayer.activeCoin.x === x &&
+      this.activePlayer.activeCoin.y === y;
 
     // if (home1 && !coin) {
     //   return "home1";
     // } else
 
     if (path && !coin) {
-      return this.player.color;
+      return this.activePlayer.color;
     }
 
     if (coin) {
-      return this.player.color;
+      return this.activePlayer.color;
     }
   }
 
