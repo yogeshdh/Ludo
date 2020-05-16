@@ -100,12 +100,12 @@
 </style>
 
 <div>
-  <h1 class="label" [style.background-color]="activePlayer.color">
-    Player {{ activePlayer.id }}
+  <h1 class="label" [style.background-color]="board.players[this.activePlayer].color">
+    Player {{ this.activePlayer}}
   </h1>
 
   <div style="display: flex; align-items: center;">
-    <button (click)="killAnimation(this.activePlayer)">Kill</button>
+    <button (click)="killAnimation(board.players[activePlayer])">Kill</button>
     <button style="margin-left: 25px;" (click)="rollDice()">Roll Dice</button>
     <h3 style="margin-left: 25px;">{{ board.dice }}</h3>
   </div>

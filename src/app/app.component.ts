@@ -12,7 +12,7 @@ export class AppComponent {
 
   board: Board;
   coins: Coin[];
-  activePlayer = null;
+  activePlayer = 0;
 
   player1;
   player2;
@@ -25,8 +25,6 @@ export class AppComponent {
     this.player2 = this.board.players[1];
     this.player3 = this.board.players[2];
     this.player4 = this.board.players[3];
-
-    this.activePlayer = this.player1;
   }
 
   ngAfterViewInit() {
@@ -45,7 +43,7 @@ export class AppComponent {
   }
 
   drawPath(i, j) {
-    var data = this.activePlayer.playerPath.find(function (ele) {
+    var data = this.board.players[this.activePlayer].playerPath.find(function (ele) {
       return ele.x === i && ele.y === j;
     });
 
@@ -59,22 +57,19 @@ export class AppComponent {
     this.board.dice = num;
 
     if (
-      this.activePlayer.activeCoin.currentPosition === -1
+      this.board.players[this.activePlayer].activeCoin.currentPosition > 0 || num == 6
     ) {
-      this.activePlayer.activeCoin.currentPosition = 0;
+      let theLoop: (i: number, delay?) => void = (i: number, delay = 100) => {
+        setTimeout(() => {
+          this.board.players[this.activePlayer].move();
+          this.killConflicts(this.board.players[this.activePlayer]);
+          if (--i) {
+            theLoop(i);
+          }
+        }, delay);
+      };
+      theLoop(num);
     }
-
-    let theLoop: (i: number, delay?) => void = (i: number, delay = 100) => {
-      var parent = this;
-      setTimeout(() => {
-        parent.activePlayer.move();
-        this.killConflicts(parent.activePlayer);
-        if (--i) {
-          theLoop(i);
-        }
-      }, delay);
-    };
-    theLoop(num);
 
     this.changePlayer();
 
@@ -83,7 +78,7 @@ export class AppComponent {
 
   private killConflicts(activePlayer) {
     this.board.players.forEach((Player) => {
-      if (Player.id != this.activePlayer.id) {
+      if (Player.id != this.board.players[this.activePlayer].id) {
         let conflictCoins = Player.coins.filter((coin) => coin.getIsPositionEqual(activePlayer.activeCoin));
         if (conflictCoins && conflictCoins.length > 0) {
           Player.activeCoin = conflictCoins[0];
@@ -94,10 +89,10 @@ export class AppComponent {
   }
 
   changePlayer() {
-    if (this.activePlayer.id === 4) {
-      this.activePlayer = this.board.players[0];
+    if (this.activePlayer === 3) {
+      this.activePlayer = 0;
     } else {
-      this.activePlayer = this.board.players[this.activePlayer.id];
+      this.activePlayer = this.activePlayer + 1;
     }
   }
 
@@ -116,10 +111,10 @@ export class AppComponent {
   }
 
   getCoinPosition() {
-    // return "transform('translateX:" + this.activePlayer.activeCoin.x + "px')";
+    // return "transform('translateX:" + this.board.players[this.activePlayer].activeCoin.x + "px')";
     try {
       var id =
-        this.activePlayer.activeCoin.x + ":" + this.activePlayer.activeCoin.y;
+        this.board.players[this.activePlayer].activeCoin.x + ":" + this.board.players[this.activePlayer].activeCoin.y;
       var ele = document.getElementById(id);
       var rect = {
         left: ele.offsetLeft + 9,
@@ -129,7 +124,7 @@ export class AppComponent {
       return "translate(" + rect.left + "px," + rect.top + "px)";
     } catch { }
 
-    return this.activePlayer.activeCoin.x;
+    return this.board.players[this.activePlayer].activeCoin.x;
   }
 
   getCoinXYPosition(coin) {
@@ -152,32 +147,32 @@ export class AppComponent {
   }
 
   drawHomes(x, y) {
-    // var home1 = this.activePlayer.playerHome.find(function (ele) {
+    // var home1 = this.board.players[this.activePlayer].playerHome.find(function (ele) {
     //   return ele.x === x && ele.y === y;
     // });
 
-    var path = this.activePlayer.visitedBoxs.find(function (ele) {
+    var path = this.board.players[this.activePlayer].visitedBoxs.find(function (ele) {
       return ele.x === x && ele.y === y;
     });
 
-    // var coin = this.activePlayer.coins.find((ele) => {
+    // var coin = this.board.players[this.activePlayer].coins.find((ele) => {
     //   return ele.x === x && ele.y === y;
     // });
 
     var coin =
-      this.activePlayer.activeCoin.x === x &&
-      this.activePlayer.activeCoin.y === y;
+      this.board.players[this.activePlayer].activeCoin.x === x &&
+      this.board.players[this.activePlayer].activeCoin.y === y;
 
     // if (home1 && !coin) {
     //   return "home1";
     // } else
 
     if (path && !coin) {
-      return this.activePlayer.color;
+      return this.board.players[this.activePlayer].color;
     }
 
     if (coin) {
-      return this.activePlayer.color;
+      return this.board.players[this.activePlayer].color;
     }
   }
 
